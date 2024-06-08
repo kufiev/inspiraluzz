@@ -1,0 +1,6 @@
+{  
+ "backend-service-url": "https://cancer-detection-3wobx2pzoq-et.a.run.app/",
+ "frontend-service-url": "http://submissionmlgc-christofel.et.r.appspot.com/",
+ "project-id": "submissionmlgc-christofel",
+ "bucket-name": "model-production-christofel"
+}
