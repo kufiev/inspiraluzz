@@ -1,22 +1,43 @@
-const { postPredictHandler, getPredictHistoriesHandler } = require('../server/handler');
- 
+const {
+  registerHandler,
+  loginHandler,
+  postPredictHandler,
+  postOverallSentimentHandler,
+} = require('../server/handler');
+
 const routes = [
+  {
+    path: '/register',
+    method: 'POST',
+    handler: registerHandler,
+  },
+  {
+    path: '/login',
+    method: 'POST',
+    handler: loginHandler,
+  },
   {
     path: '/predict',
     method: 'POST',
     handler: postPredictHandler,
     options: {
       payload: {
-        allow: 'multipart/form-data',
-        multipart: true
-      }
-    }
+        allow: 'application/json',
+        parse: true,
+      },
+    },
   },
   {
-    path: '/predict/histories',
-    method: 'GET',
-    handler: getPredictHistoriesHandler
-  }
-]
- 
+    path: '/predict/overall',
+    method: 'POST',
+    handler: postOverallSentimentHandler,
+    options: {
+      payload: {
+        allow: 'application/json',
+        parse: true,
+      },
+    },
+  },
+];
+
 module.exports = routes;
