@@ -1,4 +1,3 @@
-
 const { storeContentDraftData } = require('../../services/storeData');
 
 const { Firestore } = require('@google-cloud/firestore');
@@ -12,7 +11,6 @@ async function postDraftContentHandler(request, h) {
   const { title, content } = request.payload;
   const authHeader = request.headers.authorization || request.state.token;
 
-  // Cek keberadaan header otorisasi
   if (!authHeader) {
     return h
       .response({
@@ -28,7 +26,6 @@ async function postDraftContentHandler(request, h) {
 
   let user;
   try {
-    // Pastikan JWT_SECRET ada
     if (!process.env.JWT_SECRET) {
       throw new Error('JWT_SECRET is not defined in environment variables');
     }
@@ -43,7 +40,6 @@ async function postDraftContentHandler(request, h) {
       .code(401);
   }
 
-  // Validasi field yang diperlukan
   if (!title || !content) {
     return h
       .response({
@@ -90,10 +86,9 @@ async function postDraftContentHandler(request, h) {
 
 async function updateDraftContentHandler(request, h) {
   const { title, content } = request.payload;
-  const { draftId } = request.params; // Get draftId from request params
+  const { draftId } = request.params;
   const authHeader = request.headers.authorization || request.state.token;
 
-  // Cek keberadaan header otorisasi
   if (!authHeader) {
     return h
       .response({
@@ -109,7 +104,6 @@ async function updateDraftContentHandler(request, h) {
 
   let user;
   try {
-    // Pastikan JWT_SECRET ada
     if (!process.env.JWT_SECRET) {
       throw new Error('JWT_SECRET is not defined in environment variables');
     }
@@ -124,7 +118,6 @@ async function updateDraftContentHandler(request, h) {
       .code(401);
   }
 
-  // Validasi field yang diperlukan
   if (!title || !content) {
     return h
       .response({
@@ -258,10 +251,9 @@ async function getDraftContentHandler(request, h) {
 }
 
 async function deleteDraftContentHandler(request, h) {
-  const { draftId } = request.params; // Get draftId from request params
+  const { draftId } = request.params;
   const authHeader = request.headers.authorization || request.state.token;
 
-  // Cek keberadaan header otorisasi
   if (!authHeader) {
     return h
       .response({
@@ -277,7 +269,6 @@ async function deleteDraftContentHandler(request, h) {
 
   let user;
   try {
-    // Pastikan JWT_SECRET ada
     if (!process.env.JWT_SECRET) {
       throw new Error('JWT_SECRET is not defined in environment variables');
     }
