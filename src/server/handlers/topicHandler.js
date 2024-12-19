@@ -44,14 +44,14 @@ async function getTopicHandler(request, h) {
       .code(400);
   }
 
-  const pageLimit = parseInt(limit, 10) || 10; // Default limit to 10 if not provided
+  const pageLimit = parseInt(limit, 10) || 10;
 
   try {
     const categoryDoc = db.collection('categories').doc(category);
     const topicsSnapshot = await categoryDoc
       .collection('topics')
       .limit(pageLimit)
-      .get(); // Apply the limit from query
+      .get();
 
     if (topicsSnapshot.empty) {
       return h
