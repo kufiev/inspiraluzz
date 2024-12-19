@@ -8,11 +8,7 @@ const InputError = require('../exceptions/InputError');
   const server = Hapi.server({
     port: 3000,
     host: 'localhost',
-    routes: {
-      cors: {
-        origin: ['*'],
-      },
-    },
+    routes: { cors: { origin: ['*'] } },
   });
 
   await server.register(require('@hapi/cookie'));

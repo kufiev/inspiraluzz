@@ -3,6 +3,9 @@ const {
   loginHandler,
   postPredictHandler,
   postOverallSentimentHandler,
+  getOverallSentimentHandler,
+  postDraftContentHandler,
+  getDraftContentHandler
 } = require('../server/handler');
 
 const routes = [
@@ -20,23 +23,36 @@ const routes = [
     path: '/predict',
     method: 'POST',
     handler: postPredictHandler,
-    options: {
-      payload: {
-        allow: 'application/json',
-        parse: true,
-      },
-    },
+    options: { payload: { allow: 'application/json', parse: true } },
   },
   {
     path: '/predict/overall',
     method: 'POST',
     handler: postOverallSentimentHandler,
+    options: { payload: { allow: 'application/json', parse: true } },
+  },
+  {
+    path: '/predict/overall',
+    method: 'GET',
+    handler: getOverallSentimentHandler,
+  },
+  {
+    path: '/drafts',
+    method: 'POST',
+    handler: postDraftContentHandler,
     options: {
       payload: {
-        allow: 'application/json',
+        output: 'stream',
+        allow: 'multipart/form-data',
         parse: true,
+        multipart: true,
       },
     },
+  },
+  {
+    path: '/drafts',
+    method: 'GET',
+    handler: getDraftContentHandler,
   },
 ];
 

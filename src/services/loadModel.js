@@ -8,7 +8,6 @@ async function loadModel() {
     const tokenizerPath = path.join(__dirname, '../../models/sentiment_analysis_tokenizer.json');
     const tokenizerData = fs.readFileSync(tokenizerPath, 'utf-8');
 
-     // Recursive parsing to handle nested JSON strings
     let tokenizer = tokenizerData;
 
     while (typeof tokenizer === 'string') {
