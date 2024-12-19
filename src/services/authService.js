@@ -1,9 +1,11 @@
+const InputError = require('../exceptions/InputError');
+
+require('dotenv').config();
+
 const { Firestore } = require('@google-cloud/firestore');
 const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcrypt');
-const InputError = require('../exceptions/InputError');
 const jwt = require('jsonwebtoken');
-
 const db = new Firestore();
 
 async function hashPassword(password) {
@@ -12,7 +14,7 @@ async function hashPassword(password) {
     const hash = await bcrypt.hash(password, salt);
     return hash;
   } catch (error) {
-    console.error('Hashing error:', error);
+    console.error('Kesalahan hashing:', error);
     throw error;
   }
 }
@@ -22,7 +24,7 @@ async function registerUser(email, password, fullName) {
     const userCollection = db.collection('users');
     const snapshot = await userCollection.where('email', '==', email).get();
     if (!snapshot.empty) {
-      throw new InputError('Email is already registered');
+      throw new InputError('Email sudah terdaftar');
     }
 
     const hashedPassword = await hashPassword(password);
@@ -48,7 +50,7 @@ async function loginUser(email, password) {
     const userCollection = db.collection('users');
     const snapshot = await userCollection.where('email', '==', email).get();
     if (snapshot.empty) {
-      throw new Error('Invalid email or password');
+      throw new Error('Email atau kata sandi tidak valid');
     }
 
     let userDoc = snapshot.docs[0];
@@ -56,10 +58,16 @@ async function loginUser(email, password) {
     const passwordIsValid = await bcrypt.compare(password, userData.password);
 
     if (!passwordIsValid) {
-      throw new Error('Invalid email or password');
+      throw new Error('Email atau kata sandi tidak valid');
     }
     const token = jwt.sign(
-      { uid: userData.uid, email: userData.email },
+      {
+        uid: userData.uid,
+        email: userData.email,
+        fullName: userData.fullName,
+        contentType: userData.contentType || '',
+        socialMedia: userData.socialMedia || [],
+      },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
@@ -68,10 +76,12 @@ async function loginUser(email, password) {
       uid: userData.uid,
       email: userData.email,
       fullName: userData.fullName,
+      contentType: userData.contentType || '',
+      socialMedia: userData.socialMedia || [],
       token: token,
     };
   } catch {
-    throw new InputError('Invalid email or password');
+    throw new InputError('Email atau kata sandi tidak valid');
   }
 }
 

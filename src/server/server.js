@@ -1,43 +1,39 @@
 require('dotenv').config();
+
 const Hapi = require('@hapi/hapi');
+const cron = require('node-cron');
+
 const routes = require('../server/routes');
-const loadModel = require('../services/loadModel');
-const InputError = require('../exceptions/InputError');
+const { checkScheduledDrafts } = require('../services/scheduleService');
 
 (async () => {
   const server = Hapi.server({
-    port: 3000,
-    host: 'localhost',
-    routes: { cors: { origin: ['*'] } },
+    port: 8080,
+    host: '0.0.0.0',
+    routes: {
+      cors: {
+        origin: ['*'],
+        credentials: true,
+        additionalHeaders: ['Authorization', 'Content-Type'],
+      },
+    },
   });
 
   await server.register(require('@hapi/cookie'));
 
   server.state('token', {
     ttl: 60 * 60 * 1000,
-    isSecure: process.env.NODE_ENV === 'production',
+    isSecure: true,
     isHttpOnly: true,
     path: '/',
     encoding: 'base64json',
+    isSameSite: 'None',
   });
-
-  const { model, tokenizer } = await loadModel();
-  server.app.model = model;
-  server.app.tokenizer = tokenizer;
 
   server.route(routes);
 
   server.ext('onPreResponse', function (request, h) {
     const response = request.response;
-
-    if (response instanceof InputError) {
-      const newResponse = h.response({
-        status: 'fail',
-        message: 'Terjadi kesalahan dalam melakukan prediksi',
-      });
-      newResponse.code(response.statusCode);
-      return newResponse;
-    }
 
     if (response.isBoom) {
       const newResponse = h.response({
@@ -49,6 +45,15 @@ const InputError = require('../exceptions/InputError');
     }
 
     return h.continue;
+  });
+
+  cron.schedule('* * * * *', async () => {
+    try {
+      console.log('Running scheduled task check...');
+      await checkScheduledDrafts();
+    } catch (error) {
+      console.error('Error in scheduled task:', error);
+    }
   });
 
   await server.start();
