@@ -8,8 +8,8 @@ const { checkScheduledDrafts } = require('../services/scheduleService');
 
 (async () => {
   const server = Hapi.server({
-    port: 8080,
-    host: '0.0.0.0',
+    port: {backend_url},
+    host: '{backend_host}',
     routes: {
       cors: {
         origin: ['*'],
