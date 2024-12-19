@@ -225,30 +225,24 @@ async function updateUserHandler(request, h) {
     );
 
     if (access_token) {
-      // Jika kode disediakan, proses kode tersebut
-      const decodedCode = decodeURIComponent(access_token); // Decode URL encoded characters
+      const decodedCode = decodeURIComponent(access_token);
 
-      // Get the tokens and set credentials
       const { tokens } = await oauth2Client.getToken(decodedCode);
       oauth2Client.setCredentials(tokens);
 
-      // Fetch existing socialMedia data from Firestore
       const userSnapshot = await userRef.get();
       const userData = userSnapshot.data();
       let currentSocialMedia = userData.socialMedia || [];
 
-      // Replace or add the YouTube token based on platform
       const updatedSocialMedia = currentSocialMedia.filter(
         (item) => item.platform !== 'youtube'
-      ); // Remove existing YouTube platform entry (if any)
+      );
 
-      // Add the updated YouTube platform with the new token
       updatedSocialMedia.push({
         platform: 'youtube',
-        token: tokens, // Store the new token directly
+        token: tokens,
       });
 
-      // Store the updated socialMedia array back to Firestore
       await userRef.set(
         {
           socialMedia: updatedSocialMedia,
@@ -262,14 +256,12 @@ async function updateUserHandler(request, h) {
       !youtubeData.token ||
       youtubeData.token.expiry_date <= Date.now()
     ) {
-      // Token YouTube tidak ada atau telah kadaluwarsa
       if (youtubeData?.token?.refresh_token) {
         try {
           oauth2Client.setCredentials(youtubeData.token);
           const { credentials } = await oauth2Client.refreshAccessToken();
           oauth2Client.setCredentials(credentials);
 
-          // Perbarui token di Firestore
           const updatedSocialMedia = userData.socialMedia.map((item) =>
             item.platform === 'youtube'
               ? { platform: 'youtube', token: credentials }
@@ -293,7 +285,6 @@ async function updateUserHandler(request, h) {
             .code(500);
         }
       } else {
-        // Generate a new authorization URL
         const authUrl = oauth2Client.generateAuthUrl({
           access_type: 'offline',
           scope: SCOPES,
@@ -311,7 +302,6 @@ async function updateUserHandler(request, h) {
       }
     }
 
-    // Proses pembaruan data lainnya jika diperlukan
     const updateData = {};
     if (contentType) updateData.contentType = contentType;
     await userRef.update(updateData);
@@ -345,7 +335,6 @@ async function updateUserTokenHandler(request, h) {
       .code(400);
   }
   try {
-    // Return a success HTML response
     return h
       .response(
         `
