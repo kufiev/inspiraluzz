@@ -37,7 +37,6 @@ async function checkScheduledDrafts() {
 
           await postDraftToYouTube(draft.userUid, draft.draftId);
 
-          // Update the draft status to 'published'
           await draftRef.update({
             status: 'published',
             processedAt: now,
@@ -47,7 +46,6 @@ async function checkScheduledDrafts() {
           );
         } catch (error) {
           console.error(`Failed to process draft ${draft.id || doc.id}`, error);
-          // Revert status to 'scheduled' if processing fails
           try {
             await draftRef.update({ status: 'draft' });
           } catch (rollbackError) {
@@ -59,7 +57,6 @@ async function checkScheduledDrafts() {
           continue;
         }
 
-        // Delete the draft after processing
         try {
           await draftRef.delete();
           console.log(`Draft ${draft.id || doc.id} deleted successfully.`);
