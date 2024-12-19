@@ -8,7 +8,6 @@ const { Storage } = require('@google-cloud/storage');
 const db = new Firestore();
 const storage = new Storage();
 
-// Function to upload the video to YouTube
 async function uploadVideo(
   auth,
   file,
@@ -42,7 +41,6 @@ async function uploadVideo(
     const res = await youtube.videos.insert(requestParameters);
     console.log(`Video uploaded successfully! Video ID: ${res.data.id}`);
   } catch (error) {
-    // Handle quota exceeded error and reauthenticate
     if (error.message.includes('quotaExceeded')) {
       console.error('Quota exceeded, re-authenticating...');
       const newAuth = await getNewToken(auth, userRef);
@@ -61,10 +59,8 @@ async function uploadVideo(
   }
 }
 
-// Function to post draft content to YouTube
 async function postDraftToYouTube(userUid, draftId) {
   try {
-    // Fetch the draft details from Firestore
     const draftRef = db
       .collection('drafts')
       .doc(userUid)
@@ -81,7 +77,6 @@ async function postDraftToYouTube(userUid, draftId) {
     const { title, description, category, keywords, privacyStatus, mediaUrl } =
       draftData;
 
-    // Get the file path from GCS
     if (!mediaUrl) {
       console.error('No media file found for this draft.');
       return;
@@ -96,8 +91,7 @@ async function postDraftToYouTube(userUid, draftId) {
       .file(filePath)
       .createReadStream();
 
-    // Authenticate and upload the video to YouTube
-    const auth = await authenticate(userUid); // Pass userId to authenticate
+    const auth = await authenticate(userUid);
     await uploadVideo(
       auth,
       fileStream,
@@ -108,7 +102,6 @@ async function postDraftToYouTube(userUid, draftId) {
       privacyStatus
     );
 
-    // Update draft status to 'published' after successful upload
     await draftRef.update({
       status: 'published',
       processedAt: new Date().toISOString(),
