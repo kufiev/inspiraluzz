@@ -81,7 +81,7 @@ const routes = [
   },
   {
     method: 'PUT',
-    path: '/drafts/{draftId}', // Updated route to include draftId as a parameter
+    path: '/drafts/{draftId}',
     handler: updateDraftContentHandler,
   },
   {
@@ -91,7 +91,7 @@ const routes = [
   },
   {
     method: 'DELETE',
-    path: '/drafts/{draftId}', // Delete specific draft
+    path: '/drafts/{draftId}',
     handler: deleteDraftContentHandler,
   },
 
