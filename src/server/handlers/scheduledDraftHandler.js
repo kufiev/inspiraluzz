@@ -25,7 +25,6 @@ async function postScheduledDraftContentHandler(request, h) {
   const file = request.payload.file;
   const authHeader = request.headers.authorization || request.state.token;
 
-  // Cek keberadaan header otorisasi
   if (!authHeader) {
     return h
       .response({
@@ -41,7 +40,6 @@ async function postScheduledDraftContentHandler(request, h) {
 
   let user;
   try {
-    // Pastikan JWT_SECRET ada
     if (!process.env.JWT_SECRET) {
       throw new Error('JWT_SECRET is not defined in environment variables');
     }
@@ -56,7 +54,6 @@ async function postScheduledDraftContentHandler(request, h) {
       .code(401);
   }
 
-  // Validasi field yang diperlukan
   if (
     !title ||
     !description ||
@@ -202,7 +199,7 @@ async function getScheduledDraftContentHandler(request, h) {
 }
 
 async function updateScheduledDraftContentHandler(request, h) {
-  const { draftId } = request.params; // Get draft ID from URL params
+  const { draftId } = request.params;
   const {
     title,
     description,
@@ -212,7 +209,7 @@ async function updateScheduledDraftContentHandler(request, h) {
     scheduledTime,
     platform,
   } = request.payload;
-  const file = request.payload.file; // File baru untuk diunggah
+  const file = request.payload.file;
   const authHeader = request.headers.authorization || request.state.token;
 
   if (!authHeader) {
@@ -256,7 +253,6 @@ async function updateScheduledDraftContentHandler(request, h) {
       .collection('items')
       .doc(draftId);
 
-    // Check if the draft exists
     const draftDoc = await draftRef.get();
     if (!draftDoc.exists) {
       return h
@@ -269,16 +265,13 @@ async function updateScheduledDraftContentHandler(request, h) {
 
     let mediaUrl = draftDoc.data().mediaUrl;
 
-    // If a new file is provided, upload the new file and delete the old one
     if (file) {
       console.log('File baru ditemukan, mengunggah file...');
 
-      // Generate new unique file name
       const uniqueFileName = `${uuidv4()}-${file.hapi.filename}`;
       const userFolderPath = `drafts/${user.uid}`;
       const newFilePath = `${userFolderPath}/${uniqueFileName}`;
 
-      // Create bucket file reference
       const bucket = storage.bucket(bucketName);
       const blob = bucket.file(newFilePath);
       const stream = blob.createWriteStream({
@@ -286,16 +279,13 @@ async function updateScheduledDraftContentHandler(request, h) {
         metadata: { contentType: file.hapi.headers['content-type'] },
       });
 
-      // Upload the new file
       await new Promise((resolve, reject) => {
         file.pipe(stream).on('error', reject).on('finish', resolve);
       });
 
-      // Construct the new media URL
       const newMediaUrl = `https://storage.googleapis.com/${bucketName}/${newFilePath}`;
       console.log('File baru berhasil diunggah:', newMediaUrl);
 
-      // Delete the old file if it exists
       if (mediaUrl) {
         const oldFilePath = mediaUrl.split(`${bucketName}/`)[1];
         const oldFile = bucket.file(oldFilePath);
@@ -314,11 +304,9 @@ async function updateScheduledDraftContentHandler(request, h) {
         }
       }
 
-      // Update the media URL to the new file's URL
       mediaUrl = newMediaUrl;
     }
 
-    // Update fields in the draft document
     await draftRef.update({
       title,
       description,
@@ -327,7 +315,7 @@ async function updateScheduledDraftContentHandler(request, h) {
       privacyStatus,
       scheduledTime: moment(scheduledTime).toISOString(),
       platform,
-      mediaUrl, // Update the media URL if new file is uploaded
+      mediaUrl,
     });
 
     return h
@@ -358,7 +346,7 @@ async function updateScheduledDraftContentHandler(request, h) {
 }
 
 async function deleteScheduledDraftContentHandler(request, h) {
-  const { draftId } = request.params; // Get draft ID from URL params
+  const { draftId } = request.params;
 
   const authHeader = request.headers.authorization || request.state.token;
 
@@ -403,7 +391,6 @@ async function deleteScheduledDraftContentHandler(request, h) {
       .collection('items')
       .doc(draftId);
 
-    // Check if the draft exists
     const draftDoc = await draftRef.get();
     if (!draftDoc.exists) {
       return h
@@ -416,7 +403,6 @@ async function deleteScheduledDraftContentHandler(request, h) {
 
     const draftData = draftDoc.data();
 
-    // Delete the file from Google Cloud Storage
     if (draftData.mediaUrl) {
       const filePath = draftData.mediaUrl.split(
         `https://storage.googleapis.com/${bucketName}/`
@@ -428,11 +414,9 @@ async function deleteScheduledDraftContentHandler(request, h) {
         console.log(`File ${filePath} successfully deleted from storage.`);
       } catch (error) {
         console.error(`Error deleting file from storage:`, error);
-        // Optionally return an error or proceed with deleting the draft
       }
     }
 
-    // Delete the draft document
     await draftRef.delete();
 
     return h
