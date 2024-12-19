@@ -22,7 +22,7 @@ async function storeDraftContentData({
   userUid,
   scheduledTime,
   platform,
-  status = 'pending', // Default status jika tidak diberikan
+  status = 'pending',
 }) {
   const draftsCollection = db
     .collection('drafts')
@@ -30,7 +30,7 @@ async function storeDraftContentData({
     .collection('items');
 
   try {
-    const draftId = uuidv4(); // Generate draftId
+    const draftId = uuidv4();
     const draftRef = draftsCollection.doc(draftId);
 
     await draftRef.set({
@@ -68,7 +68,7 @@ async function storeContentDraftData({
     .collection('draftsItems');
 
   try {
-    const draftId = uuidv4(); // Generate draftId
+    const draftId = uuidv4();
     const draftRef = draftsCollection.doc(draftId);
 
     await draftRef.set({
@@ -94,8 +94,7 @@ async function storeChatData(userUid, chatHistory, topic) {
       .doc(userUid)
       .collection('chatsItems');
 
-    // Update the document with the new chat history
-    const chatId = uuidv4(); // Generate draftId
+    const chatId = uuidv4();
     const chatRef = chatsCollection.doc(chatId);
     await chatRef.set(
       {
@@ -105,7 +104,7 @@ async function storeChatData(userUid, chatHistory, topic) {
         topic,
         updatedAt: new Date().toISOString(),
       },
-      { merge: true } // Ensure existing data is merged, not replaced
+      { merge: true }
     );
 
     console.log('Chat data successfully updated for:', chatId);
