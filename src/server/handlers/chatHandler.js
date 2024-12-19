@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const db = new Firestore();
 
 async function newChatHandler(request, h) {
-  const { topic } = request.payload; // Get topic from payload
+  const { topic } = request.payload;
   const token = request.state.token;
 
   if (!token) {
@@ -21,11 +21,9 @@ async function newChatHandler(request, h) {
   }
 
   try {
-    // Decode token and fetch user data
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userUid = decoded.uid;
 
-    // Create a new chat document with the given topic
     const chatId = await storeChatData(userUid, [], topic);
 
     return h
@@ -51,7 +49,6 @@ async function chatHandler(request, h) {
   const { prompt } = request.payload;
 
   try {
-    // Fetch user UID from the token
     const token = request.state.token;
     if (!token) {
       return h
@@ -62,7 +59,6 @@ async function chatHandler(request, h) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userUid = decoded.uid;
 
-    // Generate chat response using `generateChat`
     const { result, chatHistory } = await generateChat(prompt, userUid, chatId);
 
     return h.response({ status: 'success', result, chatHistory }).code(200);
@@ -76,7 +72,6 @@ async function chatHandler(request, h) {
 
 async function deleteChatHandler(request, h) {
   const { chatId } = request.params;
-  // Fetch user UID from the token
   const token = request.state.token;
   if (!token) {
     return h
