@@ -3,12 +3,10 @@ const { google } = require('googleapis');
 const { Firestore } = require('@google-cloud/firestore');
 const db = new Firestore();
 
-// OAuth2 client setup using environment variables
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI;
 
-// Function to authenticate with OAuth2
 async function authenticate(userUid) {
   try {
     const oauth2Client = new google.auth.OAuth2(
