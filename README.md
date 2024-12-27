@@ -1,1 +1,1 @@
-# inspiraluzzz
+# inspiraluz
